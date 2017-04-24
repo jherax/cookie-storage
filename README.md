@@ -34,7 +34,7 @@ $ yarn add cookie-storage-v2
 <script src="https://unpkg.com/cookie-storage-v2/dist/cookie-storage.min.js"></script>
 
 <!-- or from rawgit.com -->
-<script src="https://cdn.rawgit.com/jherax/cookie-storage/1.0.0/dist/cookie-storage.min.js"></script>
+<script src="https://cdn.rawgit.com/jherax/cookie-storage/1.0.1/dist/cookie-storage.min.js"></script>
 ```
 
 In the above case, [`cookieStorage`](#api) is included as a global object
@@ -99,6 +99,7 @@ configures the way how the cookie is stored. It has the following properties:
 
 - `domain`_`{string}`_: the domain or subdomain where the cookie will be valid.
 - `path`_`{string}`_: relative path where the cookie is valid. _Default `"/"`_
+- `secure`_`{boolean}`_: if provided, sets a secure cookie (HTTPS).
 - `expires`_`{Date, object}`_: the expiration date of the cookie.
   You can pass an object describing the expiration:
   - `date`_`{Date}`_: if provided, this date will be applied, otherwise the
@@ -125,12 +126,13 @@ cookieStorage.setItem('activity', data, {
 });
 
 cookieStorage.setItem('testing1', true, {
-  path: '/profile',
-  expires: new Date('2018/03/06'),
+  secure: true,
+  path: '/jherax',
+  expires: new Date('2017/12/31'),
 });
 
 cookieStorage.setItem('testing2', [1,4,7], {
-  domain: '.wordpress.com',
+  domain: '.github.com',
   expires: { days: 1 },
 });
 
