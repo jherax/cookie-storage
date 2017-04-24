@@ -1,0 +1,57 @@
+{
+  "name": "cookie-storage-v2",
+  "version": "1.0.0",
+  "description": "A lightweight JavaScript UMD to handle cookies through Web Storage Interface",
+  "author": "David Rivera <jherax@gmail.com>",
+  "main": "dist/cookie-storage.js",
+  "module": "src/main.js",
+  "browser": "dist/cookie-storage.min.js",
+  "unpkg": "dist/cookie-storage.min.js",
+  "keywords": [
+    "cookie",
+    "storage",
+    "webStorage",
+    "web storage",
+    "javascript"
+  ],
+  "repository": {
+    "url": "git@github.com:jherax/cookie-storage.git",
+    "type": "git"
+  },
+  "bugs": {
+    "url": "https://github.com/jherax/cookie-storage/issues"
+  },
+  "homepage": "https://github.com/jherax/cookie-storage#readme",
+  "scripts": {
+    "webpack": "webpack",
+    "eslint": "eslint src || true",
+    "build": "webpack --bail --config webpack/build.js"
+  },
+  "engines": {
+    "node": ">=6.0"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "babel-core": "^6.23.1",
+    "babel-eslint": "^7.1.1",
+    "babel-loader": "^6.4.0",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-preset-es2015": "^6.22.0",
+    "babel-preset-stage-2": "^6.22.0",
+    "clean-webpack-plugin": "^0.1.15",
+    "eslint": "^3.17.1",
+    "eslint-config-airbnb-base": "^11.1.1",
+    "eslint-loader": "^1.6.3",
+    "eslint-plugin-import": "^2.2.0",
+    "webpack": "^2.2.1"
+  },
+  "babel": {
+    "presets": [
+      "es2015",
+      "stage-2"
+    ],
+    "plugins": [
+      "babel-plugin-add-module-exports"
+    ]
+  }
+}
