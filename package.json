@@ -1,6 +1,6 @@
 {
   "name": "cookie-storage-v2",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A lightweight JavaScript UMD to handle cookies through Web Storage Interface",
   "author": "David Rivera <jherax@gmail.com>",
   "main": "dist/cookie-storage.js",
