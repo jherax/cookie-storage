@@ -1,4 +1,6 @@
-import {alterDate, isObject, setProperty} from './utils';
+import {isObject, setProperty} from './utils';
+import formatMetadata from './format-metadata';
+import buildExpiration from './expiration-date';
 
 /**
  * @private
@@ -21,54 +23,6 @@ const $cookie = {
 /**
  * @private
  *
- * Builds the expiration for the cookie.
- *
- * @see utils.alterDate(options)
- *
- * @param  {Date|object} date: the expiration date
- * @return {string}
- */
-function buildExpirationString(date) {
-  const expires = (date instanceof Date ?
-    alterDate({date}) :
-    alterDate(date)
-  );
-  return expires.toUTCString();
-}
-
-/**
- * @private
- *
- * Builds the string for the cookie metadata.
- *
- * @param  {string} key: name of the metadata
- * @param  {object} data: metadata of the cookie
- * @return {string}
- */
-function buildMetadataFor(key, data) {
-  if (!data[key]) return '';
-  return `;${key}=${data[key]}`;
-}
-
-/**
- * @private
- *
- * Builds the whole string for the cookie metadata.
- *
- * @param  {object} data: metadata of the cookie
- * @return {string}
- */
-function formatMetadata(data) {
-  const expires = buildMetadataFor('expires', data);
-  const domain = buildMetadataFor('domain', data);
-  const path = buildMetadataFor('path', data);
-  const secure = data.secure ? ';secure' : '';
-  return `${expires}${domain}${path}${secure}`;
-}
-
-/**
- * @private
- *
  * Finds an element in the array.
  *
  * @param  {string} cookie: key=value
@@ -81,7 +35,7 @@ function findCookie(cookie) {
 }
 
 /**
- * @private
+ * @public
  *
  * Create, read, and delete elements from document.cookie,
  * and implements the Web Storage interface.
@@ -97,7 +51,7 @@ function cookieStorage() {
       $cookie.data[key] = {path: options.path};
       const metadata = $cookie.data[key];
       if (isObject(options.expires) || options.expires instanceof Date) {
-        metadata.expires = buildExpirationString(options.expires);
+        metadata.expires = buildExpiration(options.expires);
       }
       if (options.domain && typeof options.domain === 'string') {
         metadata.domain = options.domain.trim();
@@ -129,7 +83,7 @@ function cookieStorage() {
     },
 
     clear() {
-      let key, indexEQ; // eslint-disable-line
+      let key, indexEQ;
       $cookie.get().split(';').forEach((cookie) => {
         indexEQ = cookie.indexOf('=');
         if (indexEQ > -1) {

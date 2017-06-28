@@ -2,6 +2,13 @@
 
 <!-- markdownlint-disable MD024 MD033 -->
 
+## 1.1.0
+
+### Improvements
+
+1. Upgraded to Webpack 3, ESLint 4.
+1. Refactored and decoupled inner modules.
+
 ## 1.0.1
 
 ### Features

@@ -1,17 +1,18 @@
-# cookie-storage
+# Cookie Storage
 
 <!-- markdownlint-disable MD014 MD025 MD033 MD034 MD036 -->
 
 A lightweight JavaScript UMD to handle cookies through Web Storage Interface.
 
 This library manages an adapter that implements an interface similar to
-[Web Storage] to normalize the API for [document.cookie], with the advantage
-that the values are stored as **JSON**, allowing to save and retrieve `Object`
-and `Array<Any>`, which is not the default behavior when using the native
+[Web Storage] to normalize the API for [document.cookie] to be as
+[window.localStorage], with the advantage that values are stored as
+**JSON**, allowing to save and retrieve values of type `Object` and
+`Array<Any>`, which is not the default behavior when using the native
 `document.cookie`.
 
 If you want a more robust mechanism to store data in `cookies`, `localStorage`,
-`sessionStorage`, `memoryStorage`, you may pay attention to [proxy-storage].
+`sessionStorage`, or `memoryStorage`, you should try [proxy-storage].
 
 ## Content
 
@@ -22,7 +23,7 @@ If you want a more robust mechanism to store data in `cookies`, `localStorage`,
 
 ## Installing the library
 
-To include this library into your package manager with `npm` or `yarn`
+To include this library into your package manager with `npm` or `yarn`, run:
 
 ```shell
 # with npm
@@ -41,7 +42,7 @@ $ yarn add cookie-storage-v2
 <script src="https://unpkg.com/cookie-storage-v2/dist/cookie-storage.min.js"></script>
 
 <!-- or from rawgit.com -->
-<script src="https://cdn.rawgit.com/jherax/cookie-storage/1.0.1/dist/cookie-storage.min.js"></script>
+<script src="https://cdn.rawgit.com/jherax/cookie-storage/1.1.0/dist/cookie-storage.min.js"></script>
 ```
 
 In the above case, [`cookieStorage`](#api) is included as a global object
@@ -61,13 +62,13 @@ or [AMD RequireJS].
 ### CommonJS
 
 ```javascript
-var cookies = require('cookie-storage-v2');
+var cookieStorage = require('cookie-storage-v2');
 ```
 
 ### ES2015 Export
 
 ```javascript
-import cookies from 'cookie-storage-v2';
+import cookieStorage from 'cookie-storage-v2';
 ```
 
 ### AMD
@@ -80,14 +81,16 @@ requirejs.config({
     'cookie-storage': '<PATH>/cookie-storage.min'
   }
 });
-require(['cookie-storage'], function(cookies) {
-  cookies.setItem('testing', [1,2,3,5,8,13], {
+require(['cookie-storage'], function(cookieStorage) {
+  cookieStorage.setItem('testing', [1,2,3,5,8,13], {
     expires: { minutes: 10 },
   });
 });
 ```
 
-See an example with RequireJS here: http://jsfiddle.net/FdKTn/72/
+See an example with RequireJS here: http://jsfiddle.net/FdKTn/76/
+
+[&#9751; Back to Index](#content)
 
 # API
 
@@ -96,7 +99,7 @@ The exposed `cookieStorage` object is an instance of the internal
 [Web Storage] interface. It can store and retrieve **primitive**,
 `Object` and `Array<Any>` values, thanks to `JSON.stringify`.
 
-The inherited members of the prototype are:
+The prototype members are:
 
 - **`setItem`**`(key, value, options)`: stores a `value` given a `key` name.
   <br>The `options` parameter is optional and describes the metadata passed
@@ -113,11 +116,11 @@ configures the way how the cookie is stored. It has the following properties:
 
 - `domain`_`{string}`_: the domain or subdomain where the cookie will be valid.
 - `path`_`{string}`_: relative path where the cookie is valid. _Default `"/"`_
-- `secure`_`{boolean}`_: if provided, sets a secure cookie (HTTPS).
+- `secure`_`{boolean}`_: if provided, creates a secure cookie over HTTPS.
 - `expires`_`{Date, object}`_: the expiration date of the cookie.
   You can pass an object describing the expiration:
   - `date`_`{Date}`_: if provided, this date will be applied, otherwise the
-    current date will be used.
+    current date is used.
   - `minutes`_`{number}`_: minutes to add / subtract
   - `hours`_`{number}`_: hours to add / subtract
   - `days`_`{number}`_: days to add / subtract
@@ -158,19 +161,18 @@ cookieStorage.setItem('testing3', 3, {
 });
 ```
 
-**Important**: Take into account that if you want to modify or remove a cookie
-that was created with a specific `path` or `domain` / subdomain, you need to
-explicitate the domain attribute in the `options` when calling
-`setItem(key, value, options)` or `removeItem(key, options)`.
+**Important**: Take into account that if you want to **modify** or **remove**
+a cookie that was created under specific `path` or `domain` (subdomain), you
+need to specify the `domain` or `path` attributes in the `options` parameter
+when calling `setItem(key, value, options)` or `removeItem(key, options)`.
+
+If you have created the cookie with **cookieStorage**, it will handle the
+metadata internally, so that you can call `removeItem(key)` with no more
+arguments.
 
 ![cookies](https://www.dropbox.com/s/wlvgm0t8xc07me1/cookies-metadata.gif?dl=1)
 
-If you have created the cookie with **cookieStorage**, it will handle the
-metadata internally, so that you can call `removeItem(key)` safely.
-
-But if you want to modify / remove a cookie that was created from another page,
-then you should provide the metadata as `path` or `domain` in order to match
-the right cookie:
+Otherwise you need to provide the metadata `path` or `domain` as mentioned before:
 
 ```javascript
 // change the value of an external cookie in /answers
@@ -186,40 +188,45 @@ cookieStorage.removeItem('optimizelyEndUserId', {
 
 ## Looping the storage
 
-You can loop over the items in the `cookieStorage` instance,
-but it is not a good practice, see the Important note below.
+You can loop over the items in the `storage` instance,
+but it is not recommended to rely on it because navigable
+items in the `storage` instance are not synchronized with
+external changes, for example, a cookie has expired, or a
+cookie/localStorage element was created/deleted from another
+page with the same domain/subdomain.
 
 ```javascript
-cookieStorage.setItem('test1', 1);
-cookieStorage.setItem('test2', 2);
+const sessionStore = new WebStorage('sessionStorage');
 
-// loop over the storage object
-Object.keys(cookieStorage).forEach((key) => {
-  console.log(key, cookieStorage[key]);
+sessionStore.setItem('test1', 1);
+sessionStore.setItem('test2', 2);
+
+// loop over the storage object (not recommended)
+Object.keys(sessionStore).forEach((key) => {
+  console.log(key, sessionStore[key]);
 });
 
-// or...
-for (let key in cookieStorage) {
-  console.log(key, cookieStorage[key]);
+// or this way (not recommended) ...
+for (let key in sessionStore) {
+  console.log(key, sessionStore[key]);
 }
 ```
 
-**Important**: Although you can loop over the storage items, it is
-recommended to use the API methods instead, this is because navigable
-items in the storage instance are not synchronized for external changes,
-e.g. a domain cookie was created from another page, or a cookie has expired.
+It is also applied not only when reading, but also when writing to storage:
 
 ```javascript
-// not recommended, they are not synchronized
+// not recommended: not synchronized
 var title = cookieStorage['title'];
 var session = cookieStorage.sessionId;
 cookieStorage['sessionId'] = 'E6URTG5';
 
-// the good way, it tracks external changes
+// good practice: sync external changes
 var title = cookieStorage.getItem('title');
 var session = cookieStorage.getItem('sessionId');
 cookieStorage.setItem('sessionId', 'E6URTG5');
 ```
+
+[&#9751; Back to API](#api)
 
 ## Polyfills
 
@@ -257,6 +264,8 @@ to the url, for example:
 Read the list of available features:
 [Features and Browsers Supported](https://polyfill.io/v2/docs/features/).
 
+[&#9751; Back to Index](#content)
+
 ## Versioning
 
 This projects adopts the [Semantic Versioning](http://semver.org/)
@@ -271,6 +280,8 @@ Given a version number MAJOR.MINOR.PATCH, increment the:
 1. MAJOR version when you make incompatible API changes.
 1. MINOR version when you add functionality in a backwards-compatible manner.
 1. PATCH version when you make backwards-compatible bug fixes.
+
+[&#9751; Back to Index](#content)
 
 ## Issues
 
@@ -291,9 +302,10 @@ repository. See [LICENSE](LICENSE) file for more information.
 
 <!-- LINKS -->
 
-[proxy-storage]: https://github.com/jherax/proxy-storage
 [Web Storage]: https://developer.mozilla.org/en-US/docs/Web/API/Storage
 [document.cookie]: https://developer.mozilla.org/en-US/docs/Web/API/Document/cookie
+[window.localStorage]: https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage
+[proxy-storage]: https://github.com/jherax/proxy-storage
 [UMD]: http://davidbcalhoun.com/2014/what-is-amd-commonjs-and-umd/
 [CommonJS]: https://blog.risingstack.com/node-js-at-scale-module-system-commonjs-require/
 [ES2015 Export]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/export

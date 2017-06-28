@@ -1,4 +1,4 @@
-/*! cookieStorage@v1.0.2. Jherax 2017. Visit https://github.com/jherax/cookie-storage */
+/*! cookieStorage@v1.1.0. Jherax 2017. Visit https://github.com/jherax/cookie-storage */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -44,9 +44,6 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// expose the module cache
 /******/ 	__webpack_require__.c = installedModules;
 /******/
-/******/ 	// identity function for calling harmony imports with the correct context
-/******/ 	__webpack_require__.i = function(value) { return value; };
-/******/
 /******/ 	// define getter function for harmony exports
 /******/ 	__webpack_require__.d = function(exports, name, getter) {
 /******/ 		if(!__webpack_require__.o(exports, name)) {
@@ -74,7 +71,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 2);
+/******/ 	return __webpack_require__(__webpack_require__.s = 1);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -88,9 +85,9 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.isObject = isObject;
-exports.alterDate = alterDate;
-exports.setProperty = setProperty;
 exports.checkEmpty = checkEmpty;
+exports.setProperty = setProperty;
+exports.tryParse = tryParse;
 /**
  * Determines whether a value is a plain object.
  *
@@ -102,30 +99,16 @@ function isObject(value) {
 }
 
 /**
- * Adds or subtracts date portions to the given date and returns the new date.
+ * Validates if the key is not empty.
+ * (null, undefined or empty string)
  *
- * @see https://gist.github.com/jherax/bbc43e479a492cc9cbfc7ccc20c53cd2
- *
- * @param  {object} options: It contains the date parts to add or remove, and can have the following properties:
- *         - {Date} date: if provided, this date will be affected, otherwise the current date will be used.
- *         - {number} minutes: minutes to add/subtract
- *         - {number} hours: hours to add/subtract
- *         - {number} days: days to add/subtract
- *         - {number} months: months to add/subtract
- *         - {number} years: years to add/subtract
- * @return {Date}
+ * @param  {string} key: keyname of an element in the storage mechanism
+ * @return {void}
  */
-function alterDate() {
-  var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-  var opt = Object.assign({}, options);
-  var d = opt.date instanceof Date ? opt.date : new Date();
-  if (+opt.minutes) d.setMinutes(d.getMinutes() + opt.minutes);
-  if (+opt.hours) d.setHours(d.getHours() + opt.hours);
-  if (+opt.days) d.setDate(d.getDate() + opt.days);
-  if (+opt.months) d.setMonth(d.getMonth() + opt.months);
-  if (+opt.years) d.setFullYear(d.getFullYear() + opt.years);
-  return d;
+function checkEmpty(key) {
+  if (key == null || key === '') {
+    throw new Error('The key provided can not be empty');
+  }
 }
 
 /**
@@ -149,236 +132,7 @@ function setProperty(obj, name, value) {
 }
 
 /**
- * Validates if the key is not empty.
- * (null, undefined or empty string)
- *
- * @param  {string} key: keyname of an element in the storage mechanism
- * @return {void}
- */
-function checkEmpty(key) {
-  if (key == null || key === '') {
-    throw new Error('The key provided can not be empty');
-  }
-}
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _utils = __webpack_require__(0);
-
-/**
- * @private
- *
- * Proxy for document.cookie
- *
- * @see
- * https://developer.mozilla.org/en-US/docs/Web/API/Document/cookie
- *
- * @type {object}
- */
-var $cookie = {
-  get: function get() {
-    return document.cookie;
-  },
-  set: function set(value) {
-    document.cookie = value;
-  },
-  data: {} };
-
-/**
- * @private
- *
- * Builds the expiration for the cookie.
- *
- * @see utils.alterDate(options)
- *
- * @param  {Date|object} date: the expiration date
- * @return {string}
- */
-function buildExpirationString(date) {
-  var expires = date instanceof Date ? (0, _utils.alterDate)({ date: date }) : (0, _utils.alterDate)(date);
-  return expires.toUTCString();
-}
-
-/**
- * @private
- *
- * Builds the string for the cookie metadata.
- *
- * @param  {string} key: name of the metadata
- * @param  {object} data: metadata of the cookie
- * @return {string}
- */
-function buildMetadataFor(key, data) {
-  if (!data[key]) return '';
-  return ';' + key + '=' + data[key];
-}
-
-/**
- * @private
- *
- * Builds the whole string for the cookie metadata.
- *
- * @param  {object} data: metadata of the cookie
- * @return {string}
- */
-function formatMetadata(data) {
-  var expires = buildMetadataFor('expires', data);
-  var domain = buildMetadataFor('domain', data);
-  var path = buildMetadataFor('path', data);
-  var secure = data.secure ? ';secure' : '';
-  return '' + expires + domain + path + secure;
-}
-
-/**
- * @private
- *
- * Finds an element in the array.
- *
- * @param  {string} cookie: key=value
- * @return {boolean}
- */
-function findCookie(cookie) {
-  var nameEQ = this.toString();
-  // prevent leading spaces before the key
-  return cookie.trim().indexOf(nameEQ) === 0;
-}
-
-/**
- * @private
- *
- * Create, read, and delete elements from document.cookie,
- * and implements the Web Storage interface.
- *
- * @return {object}
- */
-function cookieStorage() {
-  var api = {
-    setItem: function setItem(key, value, options) {
-      options = Object.assign({ path: '/' }, options);
-      // keep track of the metadata associated to the cookie
-      $cookie.data[key] = { path: options.path };
-      var metadata = $cookie.data[key];
-      if ((0, _utils.isObject)(options.expires) || options.expires instanceof Date) {
-        metadata.expires = buildExpirationString(options.expires);
-      }
-      if (options.domain && typeof options.domain === 'string') {
-        metadata.domain = options.domain.trim();
-      }
-      if (options.secure === true) metadata.secure = true;
-      var cookie = key + '=' + encodeURIComponent(value) + formatMetadata(metadata);
-      // TODO: should encodeURIComponent(key) ?
-      $cookie.set(cookie);
-    },
-    getItem: function getItem(key) {
-      var value = null;
-      var nameEQ = key + '=';
-      var cookie = $cookie.get().split(';').find(findCookie, nameEQ);
-      if (cookie) {
-        // prevent leading spaces before the key name
-        value = cookie.trim().substring(nameEQ.length, cookie.length);
-        value = decodeURIComponent(value);
-      }
-      if (value === null) delete $cookie.data[key];
-      return value;
-    },
-    removeItem: function removeItem(key, options) {
-      var metadata = Object.assign({}, $cookie.data[key], options);
-      metadata.expires = { days: -1 };
-      api.setItem(key, '', metadata);
-      delete $cookie.data[key];
-    },
-    clear: function clear() {
-      var key = void 0,
-          indexEQ = void 0; // eslint-disable-line
-      $cookie.get().split(';').forEach(function (cookie) {
-        indexEQ = cookie.indexOf('=');
-        if (indexEQ > -1) {
-          key = cookie.substring(0, indexEQ);
-          // prevent leading spaces before the key
-          api.removeItem(key.trim());
-        }
-      });
-    }
-  };
-
-  return initialize(api);
-}
-
-/**
- * @private
- *
- * Copy the current items in the cookie storage.
- *
- * @param  {object} api: the storage mechanism to initialize
- * @return {object}
- */
-function initialize(api) {
-  // sets API members to read-only and non-enumerable
-  for (var prop in api) {
-    // eslint-disable-line
-    (0, _utils.setProperty)(api, prop);
-  }
-  // copies all existing elements in the storage
-  $cookie.get().split(';').forEach(function (cookie) {
-    var index = cookie.indexOf('=');
-    var key = cookie.substring(0, index).trim();
-    var value = cookie.substring(index + 1).trim();
-    if (key) api[key] = decodeURIComponent(value);
-  });
-  return api;
-}
-
-/**
- * @public API
- */
-exports.default = cookieStorage();
-module.exports = exports['default'];
-
-/***/ }),
-/* 2 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _cookieStorage = __webpack_require__(1);
-
-var _cookieStorage2 = _interopRequireDefault(_cookieStorage);
-
-var _utils = __webpack_require__(0);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-/**
- * @private
- *
- * Keys not allowed for cookies.
- *
- * @type {RegExp}
- */
-var bannedKeys = /^(?:expires|max-age|path|domain|secure)$/i;
-
-/**
- * @private
- *
- * Try to parse a value
+ * Try to parse a value from JSON.
  *
  * @param  {string} value: the value to parse
  * @return {any}
@@ -393,19 +147,52 @@ function tryParse(value) {
   return parsed;
 }
 
+/***/ }),
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _utils = __webpack_require__(0);
+
+var _cookieStorage = __webpack_require__(2);
+
+var _cookieStorage2 = _interopRequireDefault(_cookieStorage);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 /**
  * @private
  *
- * Copies all existing keys in the cookieStorage.
+ * Keys not allowed for cookies.
  *
- * @param  {CookieStorage} obj: the object to where copy the keys
- * @param  {object} storage: the storage mechanism
- * @return {void}
+ * @type {RegExp}
  */
-function copyKeys(obj, storage) {
+var BANNED_KEYS = /^(?:expires|max-age|path|domain|secure)$/i;
+
+/**
+ * @private
+ *
+ * Copies all existing keys in the storage.
+ *
+ * @param  {CookieStorage} instance: the object to where copy the keys
+ * @param  {object} storage: the storage mechanism
+ * @return {object}
+ */
+function copyKeys(instance, storage) {
   Object.keys(storage).forEach(function (key) {
-    obj[key] = tryParse(storage[key]);
+    instance[key] = (0, _utils.tryParse)(storage[key]);
   });
+  return instance;
 }
 
 /**
@@ -421,7 +208,6 @@ function copyKeys(obj, storage) {
  */
 
 var CookieStorage = function () {
-
   /**
    * Creates an instance of CookieStorage.
    *
@@ -438,7 +224,7 @@ var CookieStorage = function () {
    *
    * @param  {string} key: keyname of the storage
    * @param  {any} value: data to save in the storage
-   * @param  {object} options: additional options for cookieStorage
+   * @param  {object} options: additional options for cookieStore
    * @return {void}
    *
    * @memberOf CookieStorage
@@ -449,7 +235,7 @@ var CookieStorage = function () {
     key: 'setItem',
     value: function setItem(key, value, options) {
       (0, _utils.checkEmpty)(key);
-      if (bannedKeys.test(key)) {
+      if (BANNED_KEYS.test(key)) {
         throw new Error('The key is a reserved word, therefore not allowed');
       }
       this[key] = value;
@@ -477,10 +263,11 @@ var CookieStorage = function () {
       (0, _utils.checkEmpty)(key);
       var value = _cookieStorage2.default.getItem(key);
       if (value == null) {
+        // null or undefined
         delete this[key];
         value = null;
       } else {
-        value = tryParse(value);
+        value = (0, _utils.tryParse)(value);
         this[key] = value;
       }
       return value;
@@ -490,7 +277,7 @@ var CookieStorage = function () {
      * Deletes a key from the storage.
      *
      * @param  {string} key: keyname of the storage
-     * @param  {object} options: additional options for cookieStorage
+     * @param  {object} options: additional options for cookieStore
      * @return {void}
      *
      * @memberOf CookieStorage
@@ -548,6 +335,245 @@ var CookieStorage = function () {
 
 exports.default = new CookieStorage();
 module.exports = exports['default'];
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _utils = __webpack_require__(0);
+
+var _formatMetadata = __webpack_require__(3);
+
+var _formatMetadata2 = _interopRequireDefault(_formatMetadata);
+
+var _expirationDate = __webpack_require__(4);
+
+var _expirationDate2 = _interopRequireDefault(_expirationDate);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * @private
+ *
+ * Proxy for document.cookie
+ *
+ * @see
+ * https://developer.mozilla.org/en-US/docs/Web/API/Document/cookie
+ *
+ * @type {object}
+ */
+var $cookie = {
+  get: function get() {
+    return document.cookie;
+  },
+  set: function set(value) {
+    document.cookie = value;
+  },
+  data: {} // metadata associated to the cookies
+};
+
+/**
+ * @private
+ *
+ * Finds an element in the array.
+ *
+ * @param  {string} cookie: key=value
+ * @return {boolean}
+ */
+function findCookie(cookie) {
+  var nameEQ = this.toString();
+  // prevent leading spaces before the key
+  return cookie.trim().indexOf(nameEQ) === 0;
+}
+
+/**
+ * @public
+ *
+ * Create, read, and delete elements from document.cookie,
+ * and implements the Web Storage interface.
+ *
+ * @return {object}
+ */
+function cookieStorage() {
+  var api = {
+    setItem: function setItem(key, value, options) {
+      options = Object.assign({ path: '/' }, options);
+      // keep track of the metadata associated to the cookie
+      $cookie.data[key] = { path: options.path };
+      var metadata = $cookie.data[key];
+      if ((0, _utils.isObject)(options.expires) || options.expires instanceof Date) {
+        metadata.expires = (0, _expirationDate2.default)(options.expires);
+      }
+      if (options.domain && typeof options.domain === 'string') {
+        metadata.domain = options.domain.trim();
+      }
+      if (options.secure === true) metadata.secure = true;
+      var cookie = key + '=' + encodeURIComponent(value) + (0, _formatMetadata2.default)(metadata);
+      // TODO: should encodeURIComponent(key) ?
+      $cookie.set(cookie);
+    },
+    getItem: function getItem(key) {
+      var value = null;
+      var nameEQ = key + '=';
+      var cookie = $cookie.get().split(';').find(findCookie, nameEQ);
+      if (cookie) {
+        // prevent leading spaces before the key name
+        value = cookie.trim().substring(nameEQ.length, cookie.length);
+        value = decodeURIComponent(value);
+      }
+      if (value === null) delete $cookie.data[key];
+      return value;
+    },
+    removeItem: function removeItem(key, options) {
+      var metadata = Object.assign({}, $cookie.data[key], options);
+      metadata.expires = { days: -1 };
+      api.setItem(key, '', metadata);
+      delete $cookie.data[key];
+    },
+    clear: function clear() {
+      var key = void 0,
+          indexEQ = void 0;
+      $cookie.get().split(';').forEach(function (cookie) {
+        indexEQ = cookie.indexOf('=');
+        if (indexEQ > -1) {
+          key = cookie.substring(0, indexEQ);
+          // prevent leading spaces before the key
+          api.removeItem(key.trim());
+        }
+      });
+    }
+  };
+
+  return initialize(api);
+}
+
+/**
+ * @private
+ *
+ * Copy the current items in the cookie storage.
+ *
+ * @param  {object} api: the storage mechanism to initialize
+ * @return {object}
+ */
+function initialize(api) {
+  // sets API members to read-only and non-enumerable
+  for (var prop in api) {
+    // eslint-disable-line
+    (0, _utils.setProperty)(api, prop);
+  }
+  // copies all existing elements in the storage
+  $cookie.get().split(';').forEach(function (cookie) {
+    var index = cookie.indexOf('=');
+    var key = cookie.substring(0, index).trim();
+    var value = cookie.substring(index + 1).trim();
+    if (key) api[key] = decodeURIComponent(value);
+  });
+  return api;
+}
+
+/**
+ * @public API
+ */
+exports.default = cookieStorage();
+module.exports = exports['default'];
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = formatMetadata;
+/**
+ * @private
+ *
+ * Builds the string for the cookie metadata.
+ *
+ * @param  {string} key: name of the metadata
+ * @param  {object} data: metadata of the cookie
+ * @return {string}
+ */
+function buildMetadataFor(key, data) {
+  if (!data[key]) return '';
+  return ';' + key + '=' + data[key];
+}
+
+/**
+ * Builds the whole string for the cookie metadata.
+ *
+ * @param  {object} data: metadata of the cookie
+ * @return {string}
+ */
+function formatMetadata(data) {
+  var expires = buildMetadataFor('expires', data);
+  var domain = buildMetadataFor('domain', data);
+  var path = buildMetadataFor('path', data);
+  var secure = data.secure ? ';secure' : '';
+  return '' + expires + domain + path + secure;
+}
+module.exports = exports['default'];
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = buildExpiration;
+/**
+ * @private
+ *
+ * Adds or subtracts date portions to the given date and returns the new date.
+ * @see https://gist.github.com/jherax/bbc43e479a492cc9cbfc7ccc20c53cd2
+ *
+ * @param  {object} options: It contains the date parts to add or remove, and can have the following properties:
+ *         - {Date} date: if provided, this date will be affected, otherwise the current date will be used.
+ *         - {number} minutes: minutes to add/subtract
+ *         - {number} hours: hours to add/subtract
+ *         - {number} days: days to add/subtract
+ *         - {number} months: months to add/subtract
+ *         - {number} years: years to add/subtract
+ * @return {Date}
+ */
+function alterDate() {
+  var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+  var opt = Object.assign({}, options);
+  var d = opt.date instanceof Date ? opt.date : new Date();
+  if (+opt.minutes) d.setMinutes(d.getMinutes() + opt.minutes);
+  if (+opt.hours) d.setHours(d.getHours() + opt.hours);
+  if (+opt.days) d.setDate(d.getDate() + opt.days);
+  if (+opt.months) d.setMonth(d.getMonth() + opt.months);
+  if (+opt.years) d.setFullYear(d.getFullYear() + opt.years);
+  return d;
+}
+
+/**
+ * Builds the expiration for the cookie.
+ *
+ * @param  {Date|object} date: the expiration date
+ * @return {string}
+ */
+function buildExpiration(date) {
+  var expires = date instanceof Date ? alterDate({ date: date }) : alterDate(date);
+  return expires.toUTCString();
+}
+module.exports = exports["default"];
 
 /***/ })
 /******/ ]);
