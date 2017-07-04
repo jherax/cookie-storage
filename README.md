@@ -1,6 +1,6 @@
 # Cookie Storage
 
-<!-- markdownlint-disable MD014 MD025 MD033 MD034 MD036 -->
+<!-- markdownlint-disable MD025 MD033 MD034 MD036 -->
 
 A lightweight JavaScript UMD to handle cookies through Web Storage Interface.
 
@@ -56,7 +56,7 @@ cookieStorage.setItem('sessionId', btoa(session));
 ```
 
 As `cookie-storage` is built as [UMD] _(Universal Module Definition)_,
-it can be included from module loaders such as [CommonJS], [ES2015 Export]
+it can be included from module loaders such as [CommonJS], [ES2015 Imports]
 or [AMD RequireJS].
 
 ### CommonJS
@@ -65,7 +65,7 @@ or [AMD RequireJS].
 var cookieStorage = require('cookie-storage-v2');
 ```
 
-### ES2015 Export
+### ES2015 Imports
 
 ```javascript
 import cookieStorage from 'cookie-storage-v2';
@@ -168,11 +168,10 @@ when calling `setItem(key, value, options)` or `removeItem(key, options)`.
 
 If you have created the cookie with **cookieStorage**, it will handle the
 metadata internally, so that you can call `removeItem(key)` with no more
-arguments.
+arguments. Otherwise you will need to provide the metadata **`path`** or
+**`domain`**:
 
 ![cookies](https://www.dropbox.com/s/wlvgm0t8xc07me1/cookies-metadata.gif?dl=1)
-
-Otherwise you need to provide the metadata `path` or `domain` as mentioned before:
 
 ```javascript
 // change the value of an external cookie in /answers
@@ -196,31 +195,29 @@ cookie/localStorage element was created/deleted from another
 page with the same domain/subdomain.
 
 ```javascript
-const sessionStore = new WebStorage('sessionStorage');
-
-sessionStore.setItem('test1', 1);
-sessionStore.setItem('test2', 2);
+cookieStorage.setItem('test1', 1);
+cookieStorage.setItem('test2', 2);
 
 // loop over the storage object (not recommended)
-Object.keys(sessionStore).forEach((key) => {
-  console.log(key, sessionStore[key]);
+Object.keys(cookieStorage).forEach((key) => {
+  console.log(key, cookieStorage[key]);
 });
 
-// or this way (not recommended) ...
-for (let key in sessionStore) {
-  console.log(key, sessionStore[key]);
+// or this way (not recommended either)
+for (let key in cookieStorage) {
+  console.log(key, cookieStorage[key]);
 }
 ```
 
 It is also applied not only when reading, but also when writing to storage:
 
 ```javascript
-// not recommended: not synchronized
+// not recommended: not synchronized with the real storage
 var title = cookieStorage['title'];
 var session = cookieStorage.sessionId;
 cookieStorage['sessionId'] = 'E6URTG5';
 
-// good practice: sync external changes
+// good practice: it is synchronized for external changes
 var title = cookieStorage.getItem('title');
 var session = cookieStorage.getItem('sessionId');
 cookieStorage.setItem('sessionId', 'E6URTG5');
@@ -308,5 +305,5 @@ repository. See [LICENSE](LICENSE) file for more information.
 [proxy-storage]: https://github.com/jherax/proxy-storage
 [UMD]: http://davidbcalhoun.com/2014/what-is-amd-commonjs-and-umd/
 [CommonJS]: https://blog.risingstack.com/node-js-at-scale-module-system-commonjs-require/
-[ES2015 Export]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/export
+[ES2015 Imports]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import
 [AMD RequireJS]: http://requirejs.org/docs/api.html#jsfiles

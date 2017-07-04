@@ -1,6 +1,6 @@
 {
   "name": "cookie-storage-v2",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A lightweight JavaScript UMD to handle cookies through Web Storage Interface",
   "author": "David Rivera <jherax@gmail.com>",
   "main": "dist/cookie-storage.js",
@@ -23,7 +23,6 @@
   },
   "homepage": "https://github.com/jherax/cookie-storage#readme",
   "scripts": {
-    "webpack": "webpack",
     "eslint": "eslint src || true",
     "build": "webpack --bail --config webpack/build.js"
   },
@@ -39,11 +38,11 @@
     "babel-preset-es2015": "^6.22.0",
     "babel-preset-stage-2": "^6.22.0",
     "clean-webpack-plugin": "^0.1.15",
-    "eslint": "^4.1.1",
+    "eslint": "^4.2.0",
     "eslint-config-airbnb-base": "^11.2.0",
-    "eslint-loader": "^1.8.0",
-    "eslint-plugin-import": "^2.6.1",
-    "webpack": "^3.0.0"
+    "eslint-loader": "^1.9.0",
+    "eslint-plugin-import": "^2.7.0",
+    "webpack": "^3.3.0"
   },
   "babel": {
     "presets": [

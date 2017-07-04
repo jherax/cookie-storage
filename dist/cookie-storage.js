@@ -1,4 +1,4 @@
-/*! cookieStorage@v1.1.0. Jherax 2017. Visit https://github.com/jherax/cookie-storage */
+/*! cookieStorage@v1.1.1. Jherax 2017. Visit https://github.com/jherax/cookie-storage */
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();

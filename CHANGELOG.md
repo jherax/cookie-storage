@@ -1,6 +1,4 @@
-# cookie-storage
-
-<!-- markdownlint-disable MD024 MD033 -->
+# Cookie Storage
 
 ## 1.1.0
 
