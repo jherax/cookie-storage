@@ -1,6 +1,6 @@
 # Cookie Storage
 
-<!-- markdownlint-disable MD014 MD025 MD033 MD034 MD036 -->
+<!-- markdownlint-disable MD025 MD033 MD034 MD036 -->
 
 A lightweight JavaScript UMD to handle cookies through Web Storage Interface.
 
@@ -196,31 +196,29 @@ cookie/localStorage element was created/deleted from another
 page with the same domain/subdomain.
 
 ```javascript
-const sessionStore = new WebStorage('sessionStorage');
-
-sessionStore.setItem('test1', 1);
-sessionStore.setItem('test2', 2);
+cookieStorage.setItem('test1', 1);
+cookieStorage.setItem('test2', 2);
 
 // loop over the storage object (not recommended)
-Object.keys(sessionStore).forEach((key) => {
-  console.log(key, sessionStore[key]);
+Object.keys(cookieStorage).forEach((key) => {
+  console.log(key, cookieStorage[key]);
 });
 
-// or this way (not recommended) ...
-for (let key in sessionStore) {
-  console.log(key, sessionStore[key]);
+// or this way (not recommended either)
+for (let key in cookieStorage) {
+  console.log(key, cookieStorage[key]);
 }
 ```
 
 It is also applied not only when reading, but also when writing to storage:
 
 ```javascript
-// not recommended: not synchronized
+// not recommended: not synchronized with the real storage
 var title = cookieStorage['title'];
 var session = cookieStorage.sessionId;
 cookieStorage['sessionId'] = 'E6URTG5';
 
-// good practice: sync external changes
+// good practice: it is synchronized for external changes
 var title = cookieStorage.getItem('title');
 var session = cookieStorage.getItem('sessionId');
 cookieStorage.setItem('sessionId', 'E6URTG5');
