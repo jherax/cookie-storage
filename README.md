@@ -6,13 +6,12 @@ A lightweight JavaScript UMD to handle cookies through Web Storage Interface.
 
 This library manages an adapter that implements an interface similar to
 [Web Storage] to normalize the API for [document.cookie] to be as
-[window.localStorage], with the advantage that values are stored as
-**JSON**, allowing to save and retrieve values of type `Object` and
-`Array<Any>`, which is not the default behavior when using the native
-`document.cookie`.
+[localStorage] / [sessionStorage], with the advantage that values are
+stored as **JSON**, allowing to store and retrieve values of type: `Object`
+and `Array<Any>` (not possible when using the native `document.cookie` API).
 
 If you want a more robust mechanism to store data in `cookies`, `localStorage`,
-`sessionStorage`, or `memoryStorage`, you should try [proxy-storage].
+`sessionStorage`, or `memoryStorage`, you should try the [proxy-storage] library.
 
 ## Content
 
@@ -301,7 +300,8 @@ repository. See [LICENSE](LICENSE) file for more information.
 
 [Web Storage]: https://developer.mozilla.org/en-US/docs/Web/API/Storage
 [document.cookie]: https://developer.mozilla.org/en-US/docs/Web/API/Document/cookie
-[window.localStorage]: https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage
+[localStorage]: https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage
+[sessionStorage]: https://developer.mozilla.org/en-US/docs/Web/API/Window/sessionStorage
 [proxy-storage]: https://github.com/jherax/proxy-storage
 [UMD]: http://davidbcalhoun.com/2014/what-is-amd-commonjs-and-umd/
 [CommonJS]: https://blog.risingstack.com/node-js-at-scale-module-system-commonjs-require/
